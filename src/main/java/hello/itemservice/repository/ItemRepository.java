@@ -3,6 +3,7 @@ package hello.itemservice.repository;
 import hello.itemservice.domain.Item;
 import hello.itemservice.domain.dto.ItemDto;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 @Transactional
+@RequiredArgsConstructor
 public class ItemRepository {
 
     @Autowired
@@ -31,14 +33,13 @@ public class ItemRepository {
     }
 
     public Item findById(Long id) {
-        return store.get(id);
+        return em.find(Item.class,id);
     }
 
     public List<Item> findAll() {
         return new ArrayList<>(store.values());
     }
 
-    @Transactional
     public void update(Long itemId, ItemDto itemDto){
         Item findItem = findById(itemId);
         findItem.setItemName(itemDto.getItemName());
