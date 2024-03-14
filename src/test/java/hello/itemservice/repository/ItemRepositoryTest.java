@@ -1,10 +1,13 @@
 package hello.itemservice.repository;
 
 import hello.itemservice.domain.Item;
+import hello.itemservice.domain.ItemType;
 import hello.itemservice.domain.dto.ItemDto;
+import hello.itemservice.service.ItemService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -13,9 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class ItemRepositoryTest {
 
     ItemRepository itemRepository = new ItemRepository();
+    ItemService itemService = new ItemService();
 
     void afterEach() {
-        itemRepository.creaStore();
+        itemRepository.clearStore();
     }
 
     @Test
@@ -51,9 +55,14 @@ class ItemRepositoryTest {
 
         Item savedItem = itemRepository.save(item);
 
-        ItemDto itemDto = new ItemDto("item2", 20, 20000);
+        List<String> regions = new ArrayList<>();
+        regions.add("서울");
+
+        ItemDto itemDto = new ItemDto("item2", 20, 20000,true, "FAST",regions,ItemType.BOOK);
+
         //when
-        itemRepository.update(item.getId(),itemDto);
+        itemService.update(item.getId(),itemDto);
+
         //then
         assertThat(savedItem.getItemName()).isEqualTo("item2");
         assertThat(savedItem.getPrice()).isEqualTo(20000);

@@ -22,13 +22,11 @@ public class ItemRepository {
     @Autowired
     EntityManager em;
 
-    private static final Map<Long, Item> store = new ConcurrentHashMap<>();
     private static long sequence = 0L;
 
     public Item save(Item item) {
         item.setId(++sequence);
         em.persist(item);
-        store.put(item.getId(),item);
         return item;
     }
 
@@ -37,17 +35,16 @@ public class ItemRepository {
     }
 
     public List<Item> findAll() {
-        return new ArrayList<>(store.values());
+        return em.createQuery("select i from item i",Item.class)
+                .getResultList();
     }
 
-    public void update(Long itemId, ItemDto itemDto){
+    public void removeItem(Long itemId) {
         Item findItem = findById(itemId);
-        findItem.setItemName(itemDto.getItemName());
-        findItem.setPrice(itemDto.getPrice());
-        findItem.setQuantity(itemDto.getQuantity());
+        em.remove(findItem);
     }
 
-    public void creaStore() {
-        store.clear();
+    public void clearStore() {
+        em.remove(findAll());
     }
 }
