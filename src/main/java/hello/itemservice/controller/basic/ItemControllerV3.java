@@ -1,38 +1,43 @@
 package hello.itemservice.controller.basic;
 
-import hello.itemservice.domain.DeliveryCode;
 import hello.itemservice.domain.Item;
-import hello.itemservice.domain.ItemType;
 import hello.itemservice.domain.dto.ItemDto;
 import hello.itemservice.repository.ItemRepository;
 import hello.itemservice.service.ItemService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
+import java.util.List;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/basic/items")
-public class ItemController {
+@RequestMapping("/basicV3/items")
+public class ItemControllerV3 {
 
     private final ItemRepository itemRepository;
     private final ItemService itemService;
+    private final ItemValidator itemValidator;
+
+    @InitBinder
+    public void init(WebDataBinder dataBinder){
+        dataBinder.addValidators(itemValidator);
+    }
 
     @GetMapping
     public String mainPage(Model model) {
         List<Item> items = itemRepository.findAll();
 
         model.addAttribute("items",items);
-        return "basic/items";
+        return "basicV3/items";
     }
 
     @PostMapping
@@ -49,7 +54,7 @@ public class ItemController {
         model.addAttribute("region", ItemService.region());
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "basic/item";
+        return "basicV3/item";
     }
 
     @GetMapping("/add")
@@ -58,40 +63,17 @@ public class ItemController {
         model.addAttribute("itemTypes", ItemService.itemTypes());
         model.addAttribute("region", ItemService.region());
         model.addAttribute("item", new Item());
-        return "basic/addForm";
+        return "basicV3/addForm";
     }
 
     @PostMapping("/add")
-    public String addItemV0(@ModelAttribute Item item, RedirectAttributes redirectAttributes, Model model) {
-        log.info("item.open={}", item.getOpen());
-        log.info("item.regions={}", item.getRegions());
-        log.info("item.itemType={}", item.getItemType());
-
-        Map<String, String> errors = new HashMap<>();
-
-        if(!StringUtils.hasText(item.getItemName())){
-            errors.put("itemName", "상품 이름은 필수입니다");
-        }
-        if (item.getPrice() == null || item.getPrice()<1000 || item.getPrice() > 1000000) {
-            errors.put("price", "가격은 1000 ~ 1,000,000 까지 허용합니다");
-        }
-        if (item.getQuantity() == null || item.getQuantity() >= 9999){
-            errors.put("quantity", "수량은 쵀대 9999개까지 입니다");
-        }
-
-        //복합 룰
-        if (item.getPrice() != null && item.getQuantity() != null) {
-            int resultPrice = item.getPrice() * item.getQuantity();
-            if (resultPrice < 10000) {
-                errors.put("globalError", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = "+ resultPrice);
-            }
-        }
+    public String addItemV3(@Validated @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
         //검증 실패시 다시 입력 폼으로
-        if (!errors.isEmpty()){
-            model.addAttribute("errors", errors);
-            log.info("errors={}", errors);
-            return "basic/addForm";
+        if (bindingResult.hasErrors()){
+            log.info("errors={}", bindingResult);
+            log.info("item.regions={}",item.getRegions());
+            return "basicV3/addForm";
         }
 
         //성공 로직
@@ -99,14 +81,14 @@ public class ItemController {
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId",savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/basic/items/{itemId}";
+        return "redirect:/basicV3/items/{itemId}";
     }
 
     @GetMapping("/remove/{itemId}")
     public String removeItem(@PathVariable(name = "itemId")long itemId, Model model) {
         log.info("item.itemId={}", itemId);
         itemRepository.removeItem(itemId);
-        return "redirect:/basic/items";
+        return "redirect:/basicV3/items";
     }
 
 
@@ -117,7 +99,7 @@ public class ItemController {
         model.addAttribute("region", ItemService.region());
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item",item);
-        return "basic/editForm";
+        return "basicV3/editForm";
     }
 
 
@@ -128,6 +110,6 @@ public class ItemController {
 
         itemService.update(itemId,itemDto);
         log.info("end");
-        return "redirect:/basic/items/{itemId}";
+        return "redirect:/basicV3/items/{itemId}";
     }
 }
