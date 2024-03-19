@@ -3,11 +3,11 @@ package hello.itemservice.controller.basic;
 import hello.itemservice.controller.form.ItemSaveForm;
 import hello.itemservice.controller.form.ItemUpdateForm;
 import hello.itemservice.domain.Item;
-import hello.itemservice.domain.SaveCheck;
-import hello.itemservice.domain.UpdateCheck;
-import hello.itemservice.domain.dto.ItemDto;
+import hello.itemservice.domain.Member;
 import hello.itemservice.repository.ItemRepository;
+import hello.itemservice.login.repository.MemberRepository;
 import hello.itemservice.service.ItemService;
+import hello.itemservice.login.service.MemberService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,8 @@ public class ItemControllerV4 {
 
     private final ItemRepository itemRepository;
     private final ItemService itemService;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
 
     @GetMapping
@@ -43,6 +45,9 @@ public class ItemControllerV4 {
     public void init() {
         itemRepository.save(new Item("itemA", 10000, 10));
         itemRepository.save(new Item("itemB", 20000, 20));
+        memberService.saveMembers(new Member("111", "111", "111"));
+        memberService.saveMembers(new Member("test2", "name2", "password2"));
+        memberService.saveMembers(new Member("test3", "name3", "password3"));
     }
 
     @GetMapping("/{itemId}")

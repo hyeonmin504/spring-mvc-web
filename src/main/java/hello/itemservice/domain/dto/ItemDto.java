@@ -37,18 +37,4 @@ public class ItemDto {
     @Enumerated(EnumType.STRING)
     private ItemType itemType;
     private List<String> regions = new LinkedList<>();
-
-    public ItemDto() {
-    }
-
-    public ItemDto(Item item) {
-        this.id = item.getId();
-        this.itemName = item.getItemName();
-        this.quantity = item.getQuantity();
-        this.price = item.getPrice();
-        this.open = item.getOpen();
-        this.deliveryCode = item.getDeliveryCode();
-        this.regions.addAll(item.getRegions());
-        this.itemType = item.getItemType();
-    }
 }
