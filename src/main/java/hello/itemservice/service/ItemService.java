@@ -22,15 +22,15 @@ public class ItemService {
     ItemRepository itemRepository;
 
     @Transactional
-    public void update(Long itemId, ItemDto itemDto) {
+    public void update(Long itemId, Item item) {
         Item findItem = itemRepository.findById(itemId);
-        findItem.setItemName(itemDto.getItemName());
-        findItem.setPrice(itemDto.getPrice());
-        findItem.setQuantity(itemDto.getQuantity());
-        findItem.setOpen(itemDto.getOpen());
-        findItem.setRegions(itemDto.getRegions());
-        findItem.setItemType(itemDto.getItemType());
-        findItem.setDeliveryCode(itemDto.getDeliveryCode());
+        findItem.setItemName(item.getItemName());
+        findItem.setPrice(item.getPrice());
+        findItem.setQuantity(item.getQuantity());
+        findItem.setOpen(item.getOpen());
+        findItem.setRegions(item.getRegions());
+        findItem.setItemType(item.getItemType());
+        findItem.setDeliveryCode(item.getDeliveryCode());
     }
 
     public static List<String> region() {

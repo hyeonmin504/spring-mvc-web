@@ -214,7 +214,9 @@ public class ItemControllerV2 {
             @PathVariable long itemId, Model model,
             @ModelAttribute ItemDto itemDto) {
 
-        itemService.update(itemId,itemDto);
+        Item item = new Item(itemDto);
+
+        itemService.update(itemId,item);
         log.info("end");
         return "redirect:/basicV2/items/{itemId}";
     }

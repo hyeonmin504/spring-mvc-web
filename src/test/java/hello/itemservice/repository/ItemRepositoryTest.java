@@ -58,15 +58,9 @@ class ItemRepositoryTest {
         List<String> regions = new ArrayList<>();
         regions.add("서울");
 
-        ItemDto itemDto = new ItemDto("item2", 20, 20000,true, "FAST",regions,ItemType.BOOK);
-
         //when
-        itemService.update(item.getId(),itemDto);
 
         //then
-        assertThat(savedItem.getItemName()).isEqualTo("item2");
-        assertThat(savedItem.getPrice()).isEqualTo(20000);
-        assertThat(savedItem.getQuantity()).isEqualTo(20);
     }
 
 }

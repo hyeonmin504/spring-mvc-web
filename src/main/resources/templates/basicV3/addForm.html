@@ -22,29 +22,28 @@
             <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">전체 오류 메시지</p>
         </div>
 
-        <div class="field-error" th:errors="*{itemName}">
-            상품명 오류
-        </div>
-
-        <div class="field-error" th:errors="*{price}">
-            가격 오류
-        </div>
-
-        <div class="field-error" th:errors="*{quantity}">
-            수량 오류
-        </div>
-
         <div>
             <label for="itemName">상품명</label>
             <input type="text" th:field="*{itemName}" id="itemName" name="itemName" class="form-control" placeholder="이름을 입력하세요">
+            <div class="field-error" th:errors="*{itemName}">
+                상품명 오류
+            </div>
         </div>
+
         <div>
             <label for="price">가격</label>
             <input type="text" th:field="*{price}" id="price" name="price" class="form-control" placeholder="가격을 입력하세요">
+            <div class="field-error" th:errors="*{price}">
+                가격 오류
+            </div>
         </div>
+
         <div>
             <label for="quantity">수량</label>
             <input type="text" th:field="*{quantity}" id="quantity" name="quantity" class="form-control" placeholder="수량을 입력하세요">
+            <div class="field-error" th:errors="*{quantity}">
+                수량 오류
+            </div>
         </div>
         <hr class="my-4">
 

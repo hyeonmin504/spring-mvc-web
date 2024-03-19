@@ -1,38 +1,41 @@
 package hello.itemservice.controller.basic;
 
-import hello.itemservice.domain.DeliveryCode;
+import hello.itemservice.controller.form.ItemSaveForm;
+import hello.itemservice.controller.form.ItemUpdateForm;
 import hello.itemservice.domain.Item;
-import hello.itemservice.domain.ItemType;
+import hello.itemservice.domain.SaveCheck;
+import hello.itemservice.domain.UpdateCheck;
 import hello.itemservice.domain.dto.ItemDto;
 import hello.itemservice.repository.ItemRepository;
 import hello.itemservice.service.ItemService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
+import java.util.List;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/basicV1/items")
-public class ItemController {
+@RequestMapping("/basicV4/items")
+public class ItemControllerV4 {
 
     private final ItemRepository itemRepository;
     private final ItemService itemService;
+
 
     @GetMapping
     public String mainPage(Model model) {
         List<Item> items = itemRepository.findAll();
 
         model.addAttribute("items",items);
-        return "basic/items";
+        return "basicV4/items";
     }
 
     @PostMapping
@@ -49,7 +52,7 @@ public class ItemController {
         model.addAttribute("region", ItemService.region());
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "basic/item";
+        return "basicV4/item";
     }
 
     @GetMapping("/add")
@@ -58,55 +61,45 @@ public class ItemController {
         model.addAttribute("itemTypes", ItemService.itemTypes());
         model.addAttribute("region", ItemService.region());
         model.addAttribute("item", new Item());
-        return "basic/addForm";
+        return "basicV4/addForm";
     }
 
     @PostMapping("/add")
-    public String addItemV0(@ModelAttribute Item item, RedirectAttributes redirectAttributes, Model model) {
-        log.info("item.open={}", item.getOpen());
-        log.info("item.regions={}", item.getRegions());
-        log.info("item.itemType={}", item.getItemType());
+    public String addItem(@Validated @ModelAttribute("item") ItemSaveForm form, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
-        Map<String, String> errors = new HashMap<>();
-
-        if(!StringUtils.hasText(item.getItemName())){
-            errors.put("itemName", "상품 이름은 필수입니다");
-        }
-        if (item.getPrice() == null || item.getPrice()<1000 || item.getPrice() > 1000000) {
-            errors.put("price", "가격은 1000 ~ 1,000,000 까지 허용합니다");
-        }
-        if (item.getQuantity() == null || item.getQuantity() >= 9999){
-            errors.put("quantity", "수량은 쵀대 9999개까지 입니다");
-        }
-
-        //복합 룰
-        if (item.getPrice() != null && item.getQuantity() != null) {
-            int resultPrice = item.getPrice() * item.getQuantity();
+        if (form.getPrice() != null && form.getQuantity() != null) {
+            int resultPrice = form.getPrice() * form.getQuantity();
             if (resultPrice < 10000) {
-                errors.put("globalError", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = "+ resultPrice);
+                //bindingResult.addError(new ObjectError("item", null,null,"가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = "+ resultPrice));
+                bindingResult.rejectValue("price",null,null, "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = "+ resultPrice);
             }
         }
 
         //검증 실패시 다시 입력 폼으로
-        if (!errors.isEmpty()){
-            model.addAttribute("errors", errors);
-            log.info("errors={}", errors);
-            return "basic/addForm";
+        if (bindingResult.hasErrors()){
+            log.info("errors={}", bindingResult);
+
+            model.addAttribute("deliveryCodes", ItemService.deliveryCodes());
+            model.addAttribute("itemTypes", ItemService.itemTypes());
+            model.addAttribute("region", ItemService.region());
+
+            return "basicV4/addForm";
         }
 
         //성공 로직
+        Item item = new Item(form);
 
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId",savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/basic/items/{itemId}";
+        return "redirect:/basicV4/items/{itemId}";
     }
 
     @GetMapping("/remove/{itemId}")
     public String removeItem(@PathVariable(name = "itemId")long itemId, Model model) {
         log.info("item.itemId={}", itemId);
         itemRepository.removeItem(itemId);
-        return "redirect:/basic/items";
+        return "redirect:/basicV4/items";
     }
 
 
@@ -116,21 +109,40 @@ public class ItemController {
         model.addAttribute("itemTypes", ItemService.itemTypes());
         model.addAttribute("region", ItemService.region());
         Item item = itemRepository.findById(itemId);
-        log.info("itemId={}", itemId);
         model.addAttribute("item",item);
-        return "basic/editForm";
+        return "basicV4/editForm";
     }
 
-
     @PostMapping("/{itemId}/edit")
-    public String editForm(
+    public String editForm2(
             @PathVariable long itemId, Model model,
-            @ModelAttribute ItemDto itemDto) {
+            @Validated @ModelAttribute("item") ItemUpdateForm itemUpdateForm,
+            BindingResult bindingResult) {
 
-        Item item = new Item(itemDto);
+        log.info("itemUpdateForm={}",itemUpdateForm);
+
+        if (itemUpdateForm.getPrice() != null && itemUpdateForm.getQuantity() != null) {
+            int resultPrice = itemUpdateForm.getPrice() * itemUpdateForm.getQuantity();
+            if (resultPrice < 10000) {
+                //bindingResult.addError(new ObjectError("item", null,null,"가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = "+ resultPrice));
+                bindingResult.rejectValue("price",null,null, "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = "+ resultPrice);
+            }
+        }
+
+        if (bindingResult.hasErrors()){
+            log.info("errors={}",bindingResult);
+
+            model.addAttribute("deliveryCodes", ItemService.deliveryCodes());
+            model.addAttribute("itemTypes", ItemService.itemTypes());
+            model.addAttribute("region", ItemService.region());
+
+            return "basicV4/editForm";
+        }
+
+        Item item = new Item(itemUpdateForm);
 
         itemService.update(itemId,item);
         log.info("end");
-        return "redirect:/basic/items/{itemId}";
+        return "redirect:/basicV4/items/{itemId}";
     }
 }
