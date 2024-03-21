@@ -19,3 +19,8 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
+
+server:
+  error:
+    whitelabel:
+      enabled: false
