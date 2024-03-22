@@ -1,4 +1,4 @@
-package hello.itemservice.exception.ApiExController;
+package hello.itemservice.exception.ApiExController.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,7 +18,7 @@ public class MyHandlerExceptionResolver implements HandlerExceptionResolver {
                 log.info("IllegalArgumentException resolver to 400");
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
                 //서블릿 컨테이너만 400오류로 왔다고 인식한다.
-                return new ModelAndView();
+                return new ModelAndView ();
                 //정상적으로 뷰를 호출한다
             }
         } catch (IOException e) {
