@@ -1,5 +1,10 @@
 package hello.itemservice;
 
+import hello.itemservice.converter.IntegerToStringConverter;
+import hello.itemservice.converter.IpPortToStringConverter;
+import hello.itemservice.converter.StringToIntegerConverter;
+import hello.itemservice.converter.StringToIpPortConverter;
+import hello.itemservice.converter.formatter.MyNumberFormatter;
 import hello.itemservice.exception.ApiExController.resolver.MyHandlerExceptionResolver;
 import hello.itemservice.exception.ApiExController.resolver.UserHandlerExceptionResolver;
 import hello.itemservice.filter.LogFilter;
@@ -10,6 +15,7 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -31,13 +37,21 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/", "/members/add", "/login", "/logout","/logout",
                         "/css/**","/*.ico", "/error/**","/error-page/**",
-                        "/api/**","/basic/api/**");
+                        "/api/**","/basic/api/**","/convert/**","/format/**");
     }
 
     @Override
     public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
         resolvers.add(new MyHandlerExceptionResolver());
         resolvers.add(new UserHandlerExceptionResolver());
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new StringToIpPortConverter());
+        registry.addConverter(new IpPortToStringConverter());
+        //추가
+        registry.addFormatter(new MyNumberFormatter());
     }
 
     //@Bean
