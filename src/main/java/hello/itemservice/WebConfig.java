@@ -14,6 +14,7 @@ import hello.itemservice.interceptor.LoginCheckInterceptor;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -23,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Configuration
+@ComponentScan
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
@@ -37,7 +39,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/", "/members/add", "/login", "/logout","/logout",
                         "/css/**","/*.ico", "/error/**","/error-page/**",
-                        "/api/**","/basic/api/**","/convert/**","/format/**");
+                        "/api/**","/basic/api/**","/convert/**","/format/**","/servlet/**",
+                        "/spring/**");
     }
 
     @Override
